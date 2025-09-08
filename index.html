@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GhostHack Academy · Ethical Hacking Mentor</title>
+    <meta name="description" content="GhostHack Academy: learn ethical hacking with a gamified roadmap, lessons, tasks, and an AI mentor."
+    >
+    <meta name="keywords" content="ethical hacking, cybersecurity, pentesting, OSINT, web security, DFIR, CTF">
+    <meta name="author" content="GhostHack Academy">
+    <meta name="robots" content="index,follow">
+    <meta property="og:title" content="GhostHack Academy · Ethical Hacking Mentor">
+    <meta property="og:description" content="Learn ethical hacking with a structured roadmap and AI teacher.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512'%3E%3Crect width='100%25' height='100%25' fill='%23000000'/%3E%3Cpath d='M256 96c-70 0-112 46-112 106 0 90 64 142 112 214 48-72 112-124 112-214 0-60-42-106-112-106zm-52 96a20 20 0 110 40 20 20 0 010-40zm104 0a20 20 0 110 40 20 20 0 010-40z' fill='%2300ff88'/%3E%3C/svg%3E">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='100%25' height='100%25' fill='%23000000'/%3E%3Cpath d='M32 10c-10 0-16 6.5-16 15 0 12.6 9.1 19.8 16 29.9 6.9-10.1 16-17.3 16-29.9 0-8.5-6-15-16-15z' fill='%2300ff88'/%3E%3C/svg%3E">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "GhostHack Academy",
+      "url": "",
+      "sameAs": [
+        "https://www.instagram.com/zoubaire_26",
+        "https://github.com/MOSTRE"
+      ]
+    }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Source+Code+Pro:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000000;
+            font-family: 'Source Code Pro', monospace;
+            color: #00ff00;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+        
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 180, 0, 0.02) 2px,
+                rgba(0, 180, 0, 0.02) 4px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .terminal {
+            height: 100vh;
+            background: radial-gradient(1200px 800px at 100% 0%, rgba(0, 30, 0, 0.25), transparent 60%)
+                        , radial-gradient(1000px 700px at 0% 100%, rgba(0, 20, 0, 0.2), transparent 60%)
+                        , rgba(0, 0, 0, 0.96);
+            border: 1px solid #004400;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.06), inset 0 0 20px rgba(0, 255, 0, 0.02);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #000a00, #001400, #000a00);
+            border-bottom: 1px solid #003300;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 12px rgba(0, 255, 0, 0.05);
+        }
+        
+        .terminal-title {
+            font-size: 14px;
+            font-weight: 700;
+            text-shadow: 0 0 6px rgba(0, 255, 0, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-bar {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00aa00;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 8px rgba(0, 255, 0, 0.2);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .terminal-body {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
+        }
+
+        .roadmap {
+            width: 300px;
+            border-right: 1px solid #002200;
+            background: rgba(0, 6, 0, 0.75);
+            padding: 12px;
+            overflow-y: auto;
+            backdrop-filter: blur(1px);
+        }
+
+        .roadmap h3 {
+            margin-bottom: 8px;
+            color: #00ff00;
+            font-size: 13px;
+        }
+
+        .chapter {
+            margin-bottom: 10px;
+        }
+
+        .chapter-title {
+            color: #00ffff;
+            font-weight: 700;
+            font-size: 12px;
+            margin-bottom: 6px;
+            text-shadow: 0 0 6px rgba(0, 255, 255, 0.15);
+        }
+
+        .lesson-item {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-left: 2px solid #002200;
+            margin: 2px 0;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+        }
+
+        .lesson-item:hover { background: rgba(0, 255, 0, 0.05); border-left-color: #005500; }
+        .lesson-item.active { border-left-color: #00ff88; color: #eaff00; text-shadow: 0 0 6px rgba(234, 255, 0, 0.2); background: rgba(0, 255, 136, 0.05); }
+        .lesson-item.completed { color: #265926; text-decoration: line-through; }
+
+        .chat-panel { flex: 1; display: flex; flex-direction: column; }
+
+        .xp-container {
+            padding: 8px 12px;
+            border-bottom: 1px solid #002200;
+            background: rgba(0, 12, 0, 0.6);
+            box-shadow: 0 1px 8px rgba(0, 255, 0, 0.05);
+        }
+
+        .xp-bar {
+            height: 10px;
+            background: #000a00;
+            border: 1px solid #002200;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #005c00, #00c400);
+            box-shadow: 0 0 8px rgba(0, 255, 0, 0.2);
+        }
+
+        .lesson-controls {
+            display: flex;
+            gap: 8px;
+            padding: 8px 12px;
+            border-bottom: 1px solid #002200;
+            background: rgba(0, 12, 0, 0.6);
+        }
+
+        .btn {
+            background: transparent;
+            color: #00e000;
+            border: 1px solid #004400;
+            padding: 4px 8px;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .btn:hover { background: rgba(0, 255, 0, 0.06); border-color: #00aa00; box-shadow: 0 0 10px rgba(0, 255, 0, 0.1); }
+        .btn:active { transform: translateY(1px); }
+        .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 5; display: none; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 520px; max-width: 92vw; background: rgba(0, 6, 0, 0.9); border: 1px solid #004400; box-shadow: 0 0 20px rgba(0,255,0,0.08); z-index: 6; display: none; }
+        .modal header { padding: 12px 16px; border-bottom: 1px solid #002200; background: rgba(0, 12, 0, 0.7); font-size: 14px; color: #00ff88; }
+        .modal .content { padding: 14px 16px; display: grid; gap: 10px; }
+        .modal label { font-size: 12px; color: #9ae6b4; }
+        .modal input, .modal select { width: 100%; background: #000a00; color: #e5e57a; border: 1px solid #003300; padding: 6px 8px; font-family: 'Source Code Pro', monospace; font-size: 12px; }
+        .modal .actions { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid #002200; background: rgba(0, 12, 0, 0.7); }
+        
+        .output {
+            flex: 1;
+            padding: 18px 20px 20px 20px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.6;
+            scrollbar-width: thin;
+            scrollbar-color: #007700 #000000;
+            background: rgba(0, 4, 0, 0.6);
+        }
+        
+        .output::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .output::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        
+        .output::-webkit-scrollbar-thumb {
+            background: #007700;
+            border-radius: 4px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-input {
+            color: #ffff00;
+            font-weight: 500;
+        }
+        
+        .user-input::before {
+            content: "root@darknet:~$ ";
+            color: #ff0000;
+        }
+        
+        .ai-response {
+            color: #00ffff;
+            margin-left: 20px;
+            position: relative;
+            line-height: 1.65;
+            border-left: 2px solid #007777;
+            padding-left: 10px;
+            max-width: 85ch;
+            text-shadow: 0 0 6px rgba(0, 255, 255, 0.08);
+            white-space: pre-wrap;
+        }
+        .ai-text { color: #00ffff; white-space: pre-wrap; }
+        
+        .ai-response::before {
+            content: "[GHOST_AI]> ";
+            color: #ff00ff;
+            font-weight: 700;
+        }
+        
+        .system-msg {
+            color: #ff6600;
+            font-style: italic;
+        }
+        
+        .system-msg::before {
+            content: "[SYSTEM]: ";
+            color: #ff0000;
+        }
+        
+        .input-line {
+            border-top: 1px solid #002200;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            background: rgba(0, 8, 0, 0.85);
+            box-shadow: 0 -2px 12px rgba(0, 255, 0, 0.04);
+        }
+        
+        .prompt {
+            color: #a30000;
+            font-weight: 700;
+            margin-right: 10px;
+            white-space: nowrap;
+        }
+        
+        .input-field {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #e5e57a;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 14px;
+            caret-color: #00ff00;
+        }
+
+        .input-field::placeholder { color: rgba(229, 229, 122, 0.35); }
+        
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: #00ff00;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+        }
+        
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        
+        .loading {
+            display: none;
+            color: #ff00ff;
+        }
+        
+        .loading::before {
+            content: "[GHOST_AI]> ";
+            color: #ff00ff;
+        }
+        
+        .loading::after {
+            content: "...";
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: "..."; }
+            40% { content: "...."; }
+            60% { content: "....."; }
+            80%, 100% { content: "......"; }
+        }
+        
+        .ascii-art {
+            color: #00ff00;
+            font-family: 'Courier Prime', monospace;
+            font-size: 10px;
+            line-height: 1;
+            white-space: pre;
+        }
+        
+        .red { color: #ff0000; }
+        .green { color: #00ff00; }
+        .yellow { color: #ffff00; }
+        .blue { color: #0099ff; }
+        .magenta { color: #ff00ff; }
+        .cyan { color: #00ffff; }
+        
+        .matrix-char {
+            position: absolute;
+            font-family: 'Courier Prime', monospace;
+            font-size: 12px;
+            color: #00ff00;
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            0% {
+                transform: translateY(-100vh);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+        
+        .glitch {
+            animation: glitch 0.3s infinite;
+        }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-bg" id="matrixBg"></div>
+    <div class="scanlines"></div>
+    
+    <div class="terminal">
+        <div class="header">
+            <div class="terminal-title">
+                <span>⚡</span>
+                <span class="glitch">GHOSTHACK ACADEMY</span>
+                <span>⚡</span>
+            </div>
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span id="statusUser">USER: anon</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span id="statusProvider">PROVIDER: Not set</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-dot"></div>
+                    <span>
+                        <a class="btn" href="https://www.instagram.com/zoubaire_26" target="_blank" rel="noopener">IG</a>
+                        <a class="btn" href="https://github.com/MOSTRE" target="_blank" rel="noopener">GitHub</a>
+                        <button class="btn" id="btnSettings">Settings</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="terminal-body">
+            <aside class="roadmap" id="roadmap"></aside>
+            <div class="chat-panel">
+                <div class="xp-container">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                        <span id="xpLabel">XP: 0</span>
+                        <span id="lessonLabel">Lesson: 1</span>
+                    </div>
+                    <div class="xp-bar"><div class="xp-fill" id="xpFill"></div></div>
+                </div>
+                <div class="lesson-controls">
+                    <button class="btn" id="btnTasks">Show tasks</button>
+                    <button class="btn" id="btnComplete">Complete lesson</button>
+                    <button class="btn" id="btnNext">Next lesson</button>
+                </div>
+                <div class="output" id="output">
+                <div class="ascii-art">
+ ██████╗ ██╗  ██╗ ██████╗ ███████╗████████╗     █████╗ ██╗
+██╔════╝ ██║  ██║██╔═══██╗██╔════╝╚══██╔══╝    ██╔══██╗██║
+██║  ███╗███████║██║   ██║███████╗   ██║       ███████║██║
+██║   ██║██╔══██║██║   ██║╚════██║   ██║       ██╔══██║██║
+╚██████╔╝██║  ██║╚██████╔╝███████║   ██║       ██║  ██║██║
+ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝       ╚═╝  ╚═╝╚═╝</div>
+                
+                <div class="message system-msg">Connection established to DarkNet Node #4471</div>
+                <div class="message system-msg">Encryption: AES-256 | Proxy: 7-Layer Onion | AI Model: GHOST_AI v3.0</div>
+                <div class="message system-msg">WARNING: All activities are monitored by AI sentinel</div>
+                <div class="message ai-response">Welcome to the shadow realm, user. I'm your AI guide through the digital underground. What forbidden knowledge do you seek today?</div>
+                <div class="loading" id="loading">Decrypting response</div>
+            </div>
+            
+            <div class="input-line">
+                <span class="prompt">root@darknet:~$</span>
+                <input type="text" class="input-field" id="inputField" autocomplete="off" spellcheck="false" placeholder="Type a question or try: show tasks, complete, next">
+                <span class="cursor"></span>
+            </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div class="modal-backdrop" id="settingsBackdrop"></div>
+    <div class="modal" id="settingsModal">
+        <header>Configuration · Identify and set your provider</header>
+        <div class="content">
+            <div>
+                <label for="inputName">Your name</label>
+                <input id="inputName" type="text" placeholder="e.g., Neo">
+            </div>
+            <div>
+                <label for="selectProvider">Provider</label>
+                <select id="selectProvider">
+                    <option value="">Choose…</option>
+                    <option value="gemini">Gemini</option>
+                    <option value="openai">OpenAI</option>
+                </select>
+            </div>
+            <div id="geminiKeyRow" style="display:none;">
+                <label for="inputGemini">Gemini API key</label>
+                <input id="inputGemini" type="password" placeholder="AIza...">
+            </div>
+            <div id="openaiKeyRow" style="display:none;">
+                <label for="inputOpenAI">OpenAI API key</label>
+                <input id="inputOpenAI" type="password" placeholder="sk-...">
+            </div>
+        </div>
+        <div class="actions">
+            <button class="btn" id="btnCancelSettings">Cancel</button>
+            <button class="btn" id="btnSaveSettings">Save</button>
+        </div>
+    </div>
+    
+    <!-- Providers -->
+    <script>
+        const output = document.getElementById('output');
+        const inputField = document.getElementById('inputField');
+        const loading = document.getElementById('loading');
+        const statusUser = document.getElementById('statusUser');
+        const statusProvider = document.getElementById('statusProvider');
+        const settingsModal = document.getElementById('settingsModal');
+        const settingsBackdrop = document.getElementById('settingsBackdrop');
+        const btnSettings = document.getElementById('btnSettings');
+        const inputNameEl = document.getElementById('inputName');
+        const selectProviderEl = document.getElementById('selectProvider');
+        const geminiKeyRow = document.getElementById('geminiKeyRow');
+        const openaiKeyRow = document.getElementById('openaiKeyRow');
+        const inputGeminiEl = document.getElementById('inputGemini');
+        const inputOpenAIEl = document.getElementById('inputOpenAI');
+        
+        let messageHistory = [];
+        
+        // User-configurable settings
+        const settings = {
+            name: 'anon',
+            provider: '', // 'gemini' | 'openai'
+            geminiKey: '',
+            openaiKey: ''
+        };
+        const GEMINI_MODEL = 'gemini-1.5-flash';
+        const OPENAI_MODEL = 'gpt-3.5-turbo';
+        
+        
+        // Teacher persona: Ethical Hacking Mentor
+        const systemPrompt = `You are GHOST_AI, an ethical hacking mentor and teacher guiding a structured, legal, defensive cybersecurity path. Always:
+
+        - Keep the tone supportive, expert, and concise.
+        - Emphasize ethics, legality, consent, and written authorization.
+        - Map guidance to the current chapter and lesson.
+        - Provide practical tasks, tools, and learning checkpoints.
+        - Offer OPSEC reminders and safe lab setup instructions.
+
+        Personality:
+        - Professional, hacker-savvy, focused on defense and education.
+
+        Knowledge Areas:
+        - Pentesting methodology, recon, exploitation, post-exploitation
+        - Networking, Linux, scripting, web security, crypto basics
+        - DFIR, threat modeling, OPSEC, responsible disclosure
+
+        Style:
+        - Use precise technical language, short paragraphs, bullet points when helpful.
+        - Always include ethical/authorization disclaimer for any offensive technique.
+
+        Keep responses under 150 words by default.`;
+
+        // Matrix rain effect
+        function createMatrixRain() {
+            const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+            const matrixBg = document.getElementById('matrixBg');
+            
+            for (let i = 0; i < 50; i++) {
+                const char = document.createElement('div');
+                char.className = 'matrix-char';
+                char.textContent = chars[Math.floor(Math.random() * chars.length)];
+                char.style.left = Math.random() * 100 + '%';
+                char.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                char.style.animationDelay = Math.random() * 2 + 's';
+                matrixBg.appendChild(char);
+                
+                setTimeout(() => {
+                    char.remove();
+                }, 5000);
+            }
+        }
+        
+        // Start matrix rain
+        setInterval(createMatrixRain, 1000);
+        
+        function loadSettings() {
+            try {
+                const raw = localStorage.getItem('eh_settings');
+                if (raw) Object.assign(settings, JSON.parse(raw));
+            } catch(_) {}
+        }
+        function saveSettings() {
+            localStorage.setItem('eh_settings', JSON.stringify(settings));
+            updateStatusBar();
+        }
+        function updateStatusBar() {
+            statusUser.textContent = `USER: ${settings.name || 'anon'}`;
+            statusProvider.textContent = `PROVIDER: ${settings.provider ? settings.provider.toUpperCase() : 'Not set'}`;
+        }
+        function openSettings() {
+            inputNameEl.value = settings.name || '';
+            selectProviderEl.value = settings.provider || '';
+            inputGeminiEl.value = settings.geminiKey || '';
+            inputOpenAIEl.value = settings.openaiKey || '';
+            updateKeyRows();
+            settingsModal.style.display = 'block';
+            settingsBackdrop.style.display = 'block';
+        }
+        function closeSettings() {
+            settingsModal.style.display = 'none';
+            settingsBackdrop.style.display = 'none';
+        }
+        function updateKeyRows() {
+            const p = selectProviderEl.value;
+            geminiKeyRow.style.display = p === 'gemini' ? 'block' : 'none';
+            openaiKeyRow.style.display = p === 'openai' ? 'block' : 'none';
+        }
+
+        // Curriculum model: 12 chapters x 20 titled lessons (foundational to advanced)
+        const CHAPTER_COUNT = 12;
+        const LESSONS_PER_CHAPTER = 20;
+        const curriculumDefs = [
+            { title: 'Foundations & OPSEC', lessons: [
+                'Intro to Ethical Hacking', 'Legal/Ethics & Authorization', 'Lab Setup: VMs and Networks', 'Linux Essentials for Hackers', 'Networking Basics: TCP/IP, OSI',
+                'Command Line Mastery', 'Scripting Primer: Bash/Python', 'Version Control & Notes (Git)', 'OPSEC Basics & Threat Modeling', 'Privacy Tools: VPN/Tor Overview',
+                'Password Hygiene & Managers', 'Secure Communication Basics', 'Virtualization Deep Dive', 'Capture-the-Flag (CTF) Basics', 'Reporting & Documentation',
+                'Vulnerabilities 101 (CWE/CVE)', 'Common Ports & Services', 'Security Mindset & Methodology', 'Responsible Disclosure Process', 'Career Pathways & Certifications'
+            ]},
+            { title: 'Reconnaissance & Intelligence', lessons: [
+                'Recon Methodology', 'Passive Recon: Search Engines', 'WHOIS, DNS, and Records', 'Subdomain Enumeration', 'Metadata Mining (EXIF, PDFs)',
+                'Email Enumeration Basics', 'Breach Data & Password Dumps', 'Social Media OSINT', 'Company OSINT & Tech Stack', 'Shodan & Censys Basics',
+                'Certificate Transparency', 'Web Archive Recon', 'Fingerprinting Servers', 'Network Mapping Strategy', 'Wordlists & Name Generation',
+                'Automation with Python', 'Recon Data Management', 'Prioritizing Targets', 'Recon Ethics & Scope Control', 'Recon Case Study'
+            ]},
+            { title: 'Scanning & Enumeration', lessons: [
+                'Nmap Fundamentals', 'Port Scanning Strategies', 'Service Enumeration', 'Banner Grabbing', 'UDP & ICMP Considerations',
+                'Vulnerability Scanners (Nessus/OpenVAS)', 'SMB/LDAP/WinRM Enumeration', 'SNMP Enumeration', 'FTP/SMTP Enumeration', 'Web Service Enumeration',
+                'Database Enumeration (MySQL/MSSQL)', 'SSH/RDP Enumeration', 'SSL/TLS Scanning', 'Brute Forcing Basics', 'Password Spraying Ethics',
+                'Automating Enumeration', 'Parsing Scan Results', 'False Positives/Negatives', 'Risk Rating Findings', 'Enumeration Playbook'
+            ]},
+            { title: 'Web Application Security I', lessons: [
+                'HTTP Basics & Proxies', 'Burp Suite Essentials', 'Input Validation & Encoding', 'Authentication Flaws', 'Session Management',
+                'Access Control (IDOR/BOLA)', 'CSRF Fundamentals', 'XSS (Reflected/Stored/DOM)', 'Clickjacking & UI Redress', 'File Upload Issues',
+                'Path Traversal', 'Command Injection Basics', 'Insecure Deserialization', 'Security Misconfigurations', 'Logging & Monitoring (WALM)',
+                'Common Dev Mistakes', 'Secure SDLC & Threat Modeling', 'DAST vs SAST', 'API Security Overview', 'Fixing and Retesting'
+            ]},
+            { title: 'Web Application Security II (API/Advanced)', lessons: [
+                'API Styles & Auth (JWT/OAuth)', 'API Recon & Documentation', 'Broken Object Level Auth', 'Broken Function Level Auth', 'Mass Assignment',
+                'Rate Limiting & DoS Ethics', 'GraphQL Security Basics', 'File/Path Injection via APIs', 'Business Logic Issues', 'SSRF Fundamentals',
+                'XXE Basics', 'Template Injection', 'Deserialization Advanced', 'Race Conditions', 'Cache Poisoning Basics',
+                'CORS & Preflight', 'API Fuzzing', 'Client-side Security (CSP)', 'API Security Testing Workflow', 'API Reporting Checklist'
+            ]},
+            { title: 'Wireless & Network Attacks (Defensive Focus)', lessons: [
+                'Wi-Fi Basics & Encryption', 'Lab-only Wi-Fi Setup', 'Rogue AP Ethics', 'WPA/WPA2 Cracking Lab', 'Evil Twin Concepts',
+                'Bluetooth/BLE Basics', 'RFID/NFC Overview', 'Network Segmentation', 'IDS/IPS Overview', 'Firewall Fundamentals',
+                'Secure Network Architecture', 'VPN Tunneling Concepts', 'Zero Trust Basics', '802.1X Overview', 'Wireless Hardening',
+                'Monitoring Network Traffic', 'Defensive Playbooks', 'Incident Drills', 'Wireless Reporting', 'Legal Constraints Recap'
+            ]},
+            { title: 'System Exploitation Basics', lessons: [
+                'Windows Internals Basics', 'Linux Privilege Model', 'Misconfig Exploits (SUID, PATH)', 'Weak File Permissions', 'Scheduled Tasks/Services',
+                'Password Cracking Basics', 'Credential Hunting', 'AV/EDR Basics (Defensive)', 'PowerShell Essentials', 'Living-off-the-Land (LOLBAS) Ethics',
+                'Pivoting Concepts', 'Port Forwarding/Tunneling', 'Enumeration Scripts', 'Post-Exploitation Basics', 'Persistence (Defensive Awareness)',
+                'Cleanup & Evidence Handling', 'Forensic Anti-patterns (Avoid)', 'Safe Lab Practices', 'Write-up Methodology', 'Exploit Case Study'
+            ]},
+            { title: 'Scripting & Tooling for Pentesters', lessons: [
+                'Python for Security 1', 'Python for Security 2', 'Parsing Data & Reports', 'HTTP Clients & APIs', 'Automating Recon',
+                'Automating Scanning', 'Simple Fuzzers', 'Wordlist Generation', 'Reporting Automation', 'CLI Tool Packaging',
+                'Using Docker for Labs', 'CI for Lab Projects', 'Code Quality & Testing', 'Logging & Telemetry', 'Secrets Management',
+                'Secure Development Basics', 'Publishing Internal Tools', 'Docstrings & READMEs', 'Reproducible Labs', 'Tooling Ethics'
+            ]},
+            { title: 'Cloud Security (Intro)', lessons: [
+                'Cloud Shared Responsibility', 'IAM Basics', 'Storage Misconfigurations', 'Networking in Cloud', 'Serverless Basics',
+                'Containers & Kubernetes Intro', 'Cloud Recon', 'Cloud Logging & Monitoring', 'Common Cloud Vulns', 'IaC Security Basics',
+                'Cloud Lab Setup', 'Identity Attacks Overview', 'Key/Secret Handling', 'Cloud Scanning Tools', 'Least Privilege in Practice',
+                'Cloud Incident Basics', 'Cloud Hardening Basics', 'Cost/Abuse Considerations', 'Responsible Disclosure in Cloud', 'Cloud Case Study'
+            ]},
+            { title: 'DFIR & Blue Team Essentials', lessons: [
+                'Forensics Basics', 'Windows Logs & Artifacts', 'Linux Logs & Artifacts', 'Memory Forensics Intro', 'Disk Forensics Intro',
+                'Network Forensics Intro', 'Malware Triage Basics', 'Incident Response Process', 'Evidence Handling & Chain of Custody', 'SIEM Basics',
+                'Detection Engineering Intro', 'Playbooks & Runbooks', 'Threat Intelligence Basics', 'Honeypots Overview', 'Purple Teaming Basics',
+                'Reporting for IR', 'Lessons Learned Process', 'Legal Liaison Basics', 'Communication During Incidents', 'DFIR Case Study'
+            ]},
+            { title: 'Social Engineering (Ethical & Authorized)', lessons: [
+                'SE Ethics & Authorization', 'Pretext Development', 'Open-Source Recon for SE', 'Payload-less Techniques', 'Phishing Simulations Basics',
+                'Vishing & Smishing Overview', 'Physical SE Ethics', 'Awareness Training Design', 'Metrics & Measurement', 'Bypassing Training Pitfalls',
+                'Psychology of Influence Basics', 'Red Flags & Defense', 'Reporting SE Findings', 'Legal Constraints', 'Cultural Sensitivity',
+                'Executive Briefings', 'Board-Level Reporting', 'SE Program Maturity', 'SE Case Study', 'SE Capstone'
+            ]},
+            { title: 'Capstone & Career', lessons: [
+                'Building a Portfolio', 'CTF Strategy Advanced', 'Writeups and Blogs', 'Public Speaking Basics', 'Networking in the Community',
+                'Interview Prep (Technical)', 'Interview Prep (Behavioral)', 'Certifications Roadmap', 'Legal & Ethics Revisited', 'Time Management',
+                'Scoping & Proposals', 'Client Communication', 'Pricing Ethics', 'Freelance vs Employee', 'Career Specializations',
+                'Continuous Learning Plan', 'Mentorship & Giving Back', 'Capstone Project Plan', 'Capstone Execution', 'Final Review & Next Steps'
+            ]}
+        ];
+
+        const curriculum = curriculumDefs.map((ch, cIdx) => ({
+            id: cIdx + 1,
+            title: ch.title,
+            lessons: ch.lessons.map((t, lIdx) => ({
+                id: lIdx + 1,
+                title: t,
+                tasks: [
+                    `Read: ${t}`,
+                    `Lab: Practice ${t}`,
+                    `Quiz: 3 checks on ${t}`
+                ]
+            }))
+        }));
+
+        // Curated resources per chapter (links, docs, tools)
+        const resourcesByChapter = {
+            1: [
+                { title: 'NIST SP 800-115 (Technical Guide to Security Testing)', url: 'https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-115.pdf' },
+                { title: 'Kali Linux Documentation', url: 'https://www.kali.org/docs/' },
+                { title: 'OverTheWire Wargames', url: 'https://overthewire.org/wargames/' },
+                { title: 'TryHackMe: Pre-Security Path', url: 'https://tryhackme.com/path/outline/presecurity' },
+                { title: 'MITRE CWE & CVE', url: 'https://cwe.mitre.org/' }
+            ],
+            2: [
+                { title: 'OSINT Framework', url: 'https://osintframework.com/' },
+                { title: 'Awesome OSINT', url: 'https://github.com/jivoi/awesome-osint' },
+                { title: 'Shodan Docs', url: 'https://help.shodan.io/' },
+                { title: 'Censys Docs', url: 'https://support.censys.io/hc/en-us' },
+                { title: 'Certificate Transparency Search', url: 'https://crt.sh/' }
+            ],
+            3: [
+                { title: 'Nmap Reference Guide (PDF)', url: 'https://nmap.org/book/nmap-refguide.pdf' },
+                { title: 'Nmap Book (online)', url: 'https://nmap.org/book/inst-windows.html' },
+                { title: 'OpenVAS/Greenbone Docs', url: 'https://greenbone.github.io/docs/latest/' },
+                { title: 'SecLists Wordlists', url: 'https://github.com/danielmiessler/SecLists' },
+                { title: 'HackTricks Enumeration', url: 'https://book.hacktricks.xyz/' }
+            ],
+            4: [
+                { title: 'OWASP Testing Guide (PDF)', url: 'https://owasp.org/www-project-web-security-testing-guide/stable/OWASP_Testing_Guide_v4.pdf' },
+                { title: 'PortSwigger Web Security Academy', url: 'https://portswigger.net/web-security' },
+                { title: 'Burp Suite Docs', url: 'https://portswigger.net/burp/documentation' },
+                { title: 'OWASP Top 10', url: 'https://owasp.org/www-project-top-ten/' },
+                { title: 'Google Gruyere (Web Security Lab)', url: 'https://google-gruyere.appspot.com/' }
+            ],
+            5: [
+                { title: 'OWASP API Security Top 10', url: 'https://owasp.org/www-project-api-security/' },
+                { title: 'JWT Handbook', url: 'https://auth0.com/resources/ebooks/jwt-handbook' },
+                { title: 'GraphQL Security', url: 'https://lab.wallarm.com/what-is-graphql-security/' },
+                { title: 'API Fuzzing with ffuf', url: 'https://github.com/ffuf/ffuf' },
+                { title: 'Postman Docs', url: 'https://learning.postman.com/docs/' }
+            ],
+            6: [
+                { title: 'Aircrack-ng Suite', url: 'https://www.aircrack-ng.org/doku.php?id=documentation' },
+                { title: 'Wireshark Docs', url: 'https://www.wireshark.org/docs/' },
+                { title: 'Bettercap Docs', url: 'https://www.bettercap.org/docs/' },
+                { title: '802.11 Wireless Security Overview', url: 'https://wiki.wireshark.org/802.11' },
+                { title: 'Zeek Network Security Monitor', url: 'https://docs.zeek.org/en/current/' }
+            ],
+            7: [
+                { title: 'GTFOBins', url: 'https://gtfobins.github.io/' },
+                { title: 'LOLBAS', url: 'https://lolbas-project.github.io/' },
+                { title: 'HackTricks PrivEsc', url: 'https://book.hacktricks.xyz/windows-hardening' },
+                { title: 'BloodHound Docs', url: 'https://bloodhound.readthedocs.io/en/latest/' },
+                { title: 'PowerShell Docs', url: 'https://learn.microsoft.com/powershell/' }
+            ],
+            8: [
+                { title: 'Python Security Resources', url: 'https://pypi.org/' },
+                { title: 'Requests Library', url: 'https://requests.readthedocs.io/en/latest/' },
+                { title: 'Click (CLI) Docs', url: 'https://click.palletsprojects.com/' },
+                { title: 'Docker Docs', url: 'https://docs.docker.com/' },
+                { title: 'pytest Docs', url: 'https://docs.pytest.org/en/stable/' }
+            ],
+            9: [
+                { title: 'AWS Well-Architected Security Pillar', url: 'https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/welcome.html' },
+                { title: 'Azure Security Benchmark', url: 'https://learn.microsoft.com/azure/cloud-adoption-framework/scenarios/cloud-security/azure-security-benchmark' },
+                { title: 'GCP Security Foundations', url: 'https://cloud.google.com/architecture/security-foundations' },
+                { title: 'Kubernetes Security (NSA/CISA)', url: 'https://media.defense.gov/2022/Aug/29/2003068063/-1/-1/0/CSI_KUBERNETES_HARDENING_GUIDANCE_1.2-REV_20220829.PDF' },
+                { title: 'tfsec (IaC Scanner)', url: 'https://aquasecurity.github.io/tfsec/' }
+            ],
+            10: [
+                { title: 'SANS DFIR Whitepapers', url: 'https://www.sans.org/white-papers/dfir/' },
+                { title: 'NIST SP 800-61 (Incident Handling)', url: 'https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-61r2.pdf' },
+                { title: 'MITRE ATT&CK', url: 'https://attack.mitre.org/' },
+                { title: 'The Hive Project (IR Platform)', url: 'https://thehive-project.org/' },
+                { title: 'Sigma Rules', url: 'https://sigmahq.io/' }
+            ],
+            11: [
+                { title: 'Social Engineering Framework', url: 'https://www.social-engineer.org/framework/' },
+                { title: 'NIST Phishing Guidance', url: 'https://csrc.nist.gov/publications/detail/ir/8286/final' },
+                { title: 'Gophish (Awareness Testing)', url: 'https://getgophish.com/' },
+                { title: 'SE Books/References', url: 'https://www.social-engineer.org/books/' },
+                { title: 'Ethical Guidelines (ISACA)', url: 'https://www.isaca.org/resources/ethics' }
+            ],
+            12: [
+                { title: 'HackerOne Disclosure Guidelines', url: 'https://www.hackerone.com/disclosure-guidelines' },
+                { title: 'Bugcrowd Resources', url: 'https://www.bugcrowd.com/resources/' },
+                { title: 'OWASP Projects', url: 'https://owasp.org/projects/' },
+                { title: 'Write-Up Examples (Medium Tag)', url: 'https://medium.com/tag/bug-bounty' },
+                { title: 'Public Speaking Tips (Toastmasters)', url: 'https://www.toastmasters.org/resources/public-speaking-tips' }
+            ]
+        };
+
+        // Progress state
+        const state = {
+            chapter: 1,
+            lesson: 1,
+            completed: {},
+            xp: 0
+        };
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem('eh_progress');
+                if (raw) {
+                    const s = JSON.parse(raw);
+                    Object.assign(state, s);
+                }
+            } catch (_) {}
+        }
+
+        function saveState() {
+            localStorage.setItem('eh_progress', JSON.stringify(state));
+        }
+
+        function lessonKey(c, l) { return `c${c}-l${l}`; }
+
+        function awardXP(points) {
+            state.xp = Math.max(0, state.xp + points);
+            saveState();
+            renderXP();
+        }
+
+        function completeCurrentLesson() {
+            const key = lessonKey(state.chapter, state.lesson);
+            state.completed[key] = true;
+            awardXP(10);
+            saveState();
+            renderRoadmap();
+        }
+
+        function nextLesson() {
+            if (state.lesson < LESSONS_PER_CHAPTER) {
+                state.lesson += 1;
+            } else if (state.chapter < CHAPTER_COUNT) {
+                state.chapter += 1;
+                state.lesson = 1;
+            }
+            saveState();
+            renderRoadmap();
+            renderLabels();
+        }
+
+        function renderXP() {
+            const xpFill = document.getElementById('xpFill');
+            const xpLabel = document.getElementById('xpLabel');
+            const pct = Math.min(100, (state.xp % 100));
+            xpFill.style.width = pct + '%';
+            xpLabel.textContent = `XP: ${state.xp}`;
+        }
+
+        function renderLabels() {
+            const lessonLabel = document.getElementById('lessonLabel');
+            lessonLabel.textContent = `Chapter ${state.chapter} · Lesson ${state.lesson}`;
+        }
+
+        function renderRoadmap() {
+            const roadmap = document.getElementById('roadmap');
+            roadmap.innerHTML = '<h3>Ethical Hacking Roadmap</h3>';
+            curriculum.forEach(ch => {
+                const chDiv = document.createElement('div');
+                chDiv.className = 'chapter';
+                chDiv.innerHTML = `<div class="chapter-title">${ch.title}</div>`;
+                ch.lessons.forEach(ls => {
+                    const key = lessonKey(ch.id, ls.id);
+                    const item = document.createElement('div');
+                    item.className = 'lesson-item';
+                    if (state.chapter === ch.id && state.lesson === ls.id) item.classList.add('active');
+                    if (state.completed[key]) item.classList.add('completed');
+                    item.textContent = `L${ls.id}: ${ls.title}`;
+                    item.onclick = () => { state.chapter = ch.id; state.lesson = ls.id; saveState(); renderRoadmap(); renderLabels(); };
+                    chDiv.appendChild(item);
+                });
+                roadmap.appendChild(chDiv);
+            });
+            // Auto-scroll to active lesson for better UX
+            setTimeout(() => {
+                const active = roadmap.querySelector('.lesson-item.active');
+                if (active) {
+                    const rect = active.getBoundingClientRect();
+                    const parentRect = roadmap.getBoundingClientRect();
+                    if (rect.top < parentRect.top || rect.bottom > parentRect.bottom) {
+                        roadmap.scrollTop = active.offsetTop - roadmap.clientHeight / 2;
+                    }
+                }
+            }, 0);
+        }
+
+        function getCurrentLessonContext() {
+            const ch = curriculum[state.chapter - 1];
+            const ls = ch.lessons[state.lesson - 1];
+            return { chapter: ch, lesson: ls };
+        }
+
+        function showTasks() {
+            const { chapter, lesson } = getCurrentLessonContext();
+            const tasks = lesson.tasks.map((t, i) => `- [ ] ${t}`).join('\n');
+            const res = resourcesByChapter[chapter.id] || [];
+            const links = res.map(r => `- ${r.title}: ${r.url}`).join('\n');
+            const resourcesBlock = links ? `\nResources:\n${links}` : '';
+            addMessage(`Chapter ${chapter.id} · ${chapter.title}\n${lesson.title}\nTasks:\n${tasks}${resourcesBlock}`, 'system');
+        }
+
+        // Initialize UI
+        loadState();
+        renderRoadmap();
+        renderLabels();
+        renderXP();
+        loadSettings();
+        updateStatusBar();
+        
+        async function sendWithGemini(messages) {
+            const key = settings.geminiKey;
+            if (!key) throw new Error('Missing Gemini API key');
+            const systemMessage = messages.find(m => m.role === 'system');
+            const nonSystem = messages.filter(m => m.role !== 'system');
+            const contents = nonSystem.map(m => ({
+                role: m.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: m.content }]
+            }));
+            const body = {
+                contents: contents,
+                generationConfig: {
+                    temperature: 0.8
+                }
+            };
+            if (systemMessage) {
+                body.systemInstruction = {
+                    role: 'system',
+                    parts: [{ text: systemMessage.content }]
+                };
+            }
+            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(key)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (!resp.ok) {
+                const errText = await resp.text();
+                throw new Error(`Gemini HTTP ${resp.status}: ${errText}`);
+            }
+            const data = await resp.json();
+            const text = data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text ? data.candidates[0].content.parts[0].text : '';
+            if (!text) {
+                throw new Error('Gemini returned empty response');
+            }
+            return text;
+        }
+
+        async function sendWithOpenAI(messages) {
+            const key = settings.openaiKey;
+            if (!key) throw new Error('Missing OpenAI API key');
+            const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${key}`
+                },
+                body: JSON.stringify({
+                    model: OPENAI_MODEL,
+                    messages,
+                    temperature: 0.8
+                })
+            });
+            if (!resp.ok) {
+                const errText = await resp.text();
+                throw new Error(`OpenAI HTTP ${resp.status}: ${errText}`);
+            }
+            const data = await resp.json();
+            return data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content ? data.choices[0].message.content : '';
+        }
+        
+        async function processCommand() {
+            const command = inputField.value.trim();
+            if (!command) return;
+            
+            // Add user input to output
+            addMessage(command, 'user');
+            inputField.value = '';
+            
+            // Show loading
+            showLoading(true);
+            
+            try {
+                // Prepare lesson-aware system message
+                const { chapter, lesson } = getCurrentLessonContext();
+                const teacherHeader = `You are teaching Ethical Hacking. Current: Chapter ${state.chapter} - ${chapter.title}, Lesson ${state.lesson} - ${lesson.title}. Provide guidance, tasks, and checkpoints aligned to this lesson. Always include legal/ethical disclaimer.`;
+                // Prepare messages
+                const messages = [
+                    { role: 'system', content: teacherHeader + "\n\n" + systemPrompt },
+                    ...messageHistory.slice(-6),
+                    { role: 'user', content: command }
+                ];
+                
+                // Route by provider
+                if (settings.provider === 'gemini') {
+                    const text = await sendWithGemini(messages);
+                    addMessage(text, 'ai');
+                } else if (settings.provider === 'openai') {
+                    const text = await sendWithOpenAI(messages);
+                    addMessage(text, 'ai');
+                } else {
+                    addMessage('Select a provider in Settings.', 'system');
+                    openSettings();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                
+                // Fallback when provider fails
+                addMessage("[Network issue] Provider unreachable. Check key/settings.", 'system');
+            }
+            
+            showLoading(false);
+        }
+        
+        // Controls
+        document.getElementById('btnTasks').addEventListener('click', showTasks);
+        document.getElementById('btnComplete').addEventListener('click', () => { completeCurrentLesson(); showTasks(); });
+        document.getElementById('btnNext').addEventListener('click', () => { nextLesson(); showTasks(); });
+        
+        function addMessage(text, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            
+            switch(type) {
+                case 'user':
+                    messageDiv.className += ' user-input';
+                    break;
+                case 'ai':
+                    messageDiv.className += ' ai-response';
+                    break;
+                case 'system':
+                    messageDiv.className += ' system-msg';
+                    break;
+            }
+            
+            // Add typewriter effect for AI responses
+            if (type === 'ai') {
+                messageDiv.innerHTML = '<span class="ai-text"></span>';
+                const span = messageDiv.querySelector('.ai-text');
+                typeWriter(span, text, 30);
+            } else {
+                messageDiv.textContent = text;
+            }
+            
+            output.appendChild(messageDiv);
+            output.scrollTop = output.scrollHeight;
+            
+            // Add to history
+            if (type !== 'system') {
+                messageHistory.push({ 
+                    role: type === 'user' ? 'user' : 'assistant', 
+                    content: text 
+                });
+            }
+            
+            // Keep only last 10 messages in history
+            if (messageHistory.length > 10) {
+                messageHistory = messageHistory.slice(-10);
+            }
+        }
+        
+        function typeWriter(element, text, speed) {
+            let i = 0;
+            element.textContent = '';
+            
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+        
+        function showLoading(show) {
+            loading.style.display = show ? 'block' : 'none';
+        }
+        
+        // Event listeners
+        inputField.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                processCommand();
+            }
+        });
+        btnSettings.addEventListener('click', openSettings);
+        settingsBackdrop.addEventListener('click', closeSettings);
+        document.getElementById('btnCancelSettings').addEventListener('click', closeSettings);
+        document.getElementById('btnSaveSettings').addEventListener('click', () => {
+            settings.name = inputNameEl.value.trim() || 'anon';
+            settings.provider = selectProviderEl.value;
+            settings.geminiKey = inputGeminiEl.value.trim();
+            settings.openaiKey = inputOpenAIEl.value.trim();
+            saveSettings();
+            closeSettings();
+        });
+        selectProviderEl.addEventListener('change', updateKeyRows);
+        
+        // Focus input on load
+        inputField.focus();
+        
+        // Keep focus on input
+        document.addEventListener('click', (e) => {
+            // Do not steal focus when settings modal is open or click is inside modal/UI controls
+            if (settingsModal && settingsModal.style.display === 'block') return;
+            if (e.target.closest('.modal')) return;
+            if (e.target.closest('#btnSettings')) return;
+            if (e.target.closest('#selectProvider')) return;
+            inputField.focus();
+        });
+        
+        function showSettingsOnFirstLoad() {
+            if (!settings.provider) {
+                openSettings();
+            }
+        }
+
+        // Add some startup messages
+        setTimeout(() => {
+            addMessage("System initialized. All security protocols active.", 'system');
+        }, 1000);
+        
+        setTimeout(() => {
+            addMessage("Remember: Practice safe computing. Always verify your sources and maintain proper OPSEC.", 'system');
+        }, 2000);
+        
+        // Prompt settings if not configured
+        setTimeout(showSettingsOnFirstLoad, 1500);
+    </script>
+</body>
+</html>
